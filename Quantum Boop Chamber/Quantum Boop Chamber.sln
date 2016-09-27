@@ -1,7 +1,7 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2015
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quantum Boop Chamber.CSharp", "Quantum Boop Chamber.CSharp.csproj", "{A3031F35-334F-34E9-DD38-140703D86E31}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{B28EFC2C-0ACF-A96D-25EA-01DF30B69C23}") = "Quantum Boop Chamber", "Assembly-CSharp.csproj", "{3D205D73-BF02-3BEA-7FC4-274BF233F1A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,12 +9,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A3031F35-334F-34E9-DD38-140703D86E31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A3031F35-334F-34E9-DD38-140703D86E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A3031F35-334F-34E9-DD38-140703D86E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A3031F35-334F-34E9-DD38-140703D86E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D205D73-BF02-3BEA-7FC4-274BF233F1A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D205D73-BF02-3BEA-7FC4-274BF233F1A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D205D73-BF02-3BEA-7FC4-274BF233F1A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D205D73-BF02-3BEA-7FC4-274BF233F1A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
 	EndGlobalSection
 EndGlobal
