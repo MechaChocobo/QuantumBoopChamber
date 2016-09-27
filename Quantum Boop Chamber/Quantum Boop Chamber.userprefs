@@ -1,0 +1,35 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Managers\ResourceManager.cs">
+    <Files>
+      <File FileName="Assets\Scripts\Counters\IdleWorkerCounter.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\LogManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\JobManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Counters\BoopCounter.cs" Line="20" Column="93" />
+      <File FileName="Assets\Scripts\Managers\ResourceManager.cs" Line="30" Column="61" />
+      <File FileName="Assets\Scripts\Managers\ShipManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\UIManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\GameController.cs" Line="76" Column="48" />
+      <File FileName="Assets\Scripts\Counters\FoodCounter.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\UnitManager.cs" Line="18" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State name="__root__">
+          <Node name="Quantum Boop Chamber" expanded="True">
+            <Node name="Assembly-CSharp" expanded="True" selected="True">
+              <Node name="Scripts" expanded="True">
+                <Node name="Counters" expanded="True" />
+                <Node name="Managers" expanded="True" />
+              </Node>
+            </Node>
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
