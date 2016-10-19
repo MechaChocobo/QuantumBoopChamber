@@ -17,7 +17,7 @@ public class PonyCounter : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(ponyCountLabel != null) {
-			ponyCountLabel.text = String.Format("{0,5:N0}", ResourceManager.instance.getPonyPopulation()) + "/" + String.Format("{0,5:N0}", ResourceManager.instance.getPonyPopulationCap());
+			ponyCountLabel.text = String.Format("{0,5:N0}", UnitManager.instance.ponyPop) + "/" + String.Format("{0,5:N0}", UnitManager.instance.ponyPopCapacity);
 		}
 	}
 }

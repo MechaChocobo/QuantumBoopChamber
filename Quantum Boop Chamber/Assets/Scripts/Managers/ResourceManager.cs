@@ -1,151 +1,150 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class ResourceManager : MonoBehaviour {
 	// Gameplay Constants
-	private static float STARTING_LINGS = 300.0f;
-	private static float STARTING_PONES = 6.0f;
+	private static float STARTING_PONE_HUG_GEN = 0.23726852f; // Pony production is 0.23 hugs/sec
 
-	private static float STARTING_PONE_BOOP_GEN = 50.0f;
+	private static float STARTING_HUG_DELTA = 0.0f;
+	private static float STARTING_FOOD_DELTA = 0.0f;
 
 	//boops are 1/16 of a hug
-	private static float BOOP_TO_HUGS_RATIO = 0.0625f;
+//	private static float HUGS_TO_BOOP_RATIO = 16.0f;
 
-	private static float STARTING_LING_CAP = 1000.0f;
-	private static float STARTING_PONE_CAP = 500.0f;
-
-	private static float STARTING_BOOP_CAP_PER_LING = 100.0f;
-	private static float STARTING_BOOP_CAP_PER_PONE = 1000.0f;
-	
+	private static float STARTING_HUG_CAP = 5000.0f;	
 	private static float STARTING_FOOD_CAP = 500.0f;
 
-	private static float BASE_BOOP_CONSUMPTION_PER_LING = 1.0f; // 1 population eats 1 food per 1 second.
-	private static float BASE_BOOP_CONSUMPTION_MULTIPLIER = 1.0f;
+	private static float BASE_HUG_CONSUMPTION_PER_LING = 0.09490741f; // Changeling consumption is 0.09 hugs/sec
+//	private static float BASE_HUG_CONSUMPTION_MULTIPLIER = 1.0f;
 	private static float BASE_FOOD_CONSUMPTION_PER_PONE = 1.0f;
-	private static float BASE_FOOD_CONSUMPTION_MULTIPLIER = 1.0f;
+//	private static float BASE_FOOD_CONSUMPTION_MULTIPLIER = 1.0f;
 
-	private static float STARTING_BOOP_PER_CLICK = 1.0f;
+	private static float STARTING_HUG_PER_CLICK = 1.0f;
 	
 	// Singleton instance
 	public static ResourceManager instance {get; private set;} 
 
-	private float boopCapacity;
-	private float boopConsumptionMultiplier;
+	private GameController gameState;
+
+	private float hugDelta;
+	private float hugCapacity;
+//	private float hugConsumptionMultiplier;
 	
-	private float boopPerClick;
-	private float boopPerPony;
-	private float boopConsPerChangeling;
-	private float boopCapFactorChangeling;
-	private float boopCapFactorPony;
-	
+	private float hugPerClick;
+	private float hugPerPony;
+	public float hugConsPerChangeling {get; private set;}
+
+	private float foodDelta;
 	private float foodCapacity;
-	private float foodConsumptionMultiplier;
+//	private float foodConsumptionMultiplier;
 	
 	private float foodPerWorker;
-	private float foodConsPerPony;
 
-	private float changelingPop; // Current total changeling population
-	private float changelingPopCapacity;
-	
-	private float ponyPop; // Current total pony population
-	private float ponyPopCapacity;
-	
+	private bool isPostStart; //Used to run a cleanup after all other start functions have been called
+	private float foodConsPerPony;
 
 	/** Lifecycle Methods **/
 	// Use this for initialization
 	void Start() {
-		changelingPop = STARTING_LINGS;
-		ponyPop = STARTING_PONES;
-		changelingPopCapacity = STARTING_LING_CAP;
-		ponyPopCapacity = STARTING_PONE_CAP;
 
 		foodCapacity = STARTING_FOOD_CAP;
-		boopCapFactorChangeling = STARTING_BOOP_CAP_PER_LING;
-		boopCapFactorPony = STARTING_BOOP_CAP_PER_PONE;
-		boopCapacity = (changelingPop * boopCapFactorChangeling) + (ponyPop * boopCapFactorPony);
-		foodConsumptionMultiplier = BASE_FOOD_CONSUMPTION_MULTIPLIER;
-		boopConsumptionMultiplier = BASE_BOOP_CONSUMPTION_MULTIPLIER;
+		hugCapacity = STARTING_HUG_CAP;
+		foodDelta = STARTING_FOOD_DELTA;
+		hugDelta = STARTING_HUG_DELTA;
+//		foodConsumptionMultiplier = BASE_FOOD_CONSUMPTION_MULTIPLIER;
+//		hugConsumptionMultiplier = BASE_HUG_CONSUMPTION_MULTIPLIER;
 
-		boopPerClick = STARTING_BOOP_PER_CLICK;
-		boopPerPony = STARTING_PONE_BOOP_GEN;		
-		boopConsPerChangeling = BASE_BOOP_CONSUMPTION_PER_LING;
-		
+		hugPerClick = STARTING_HUG_PER_CLICK;
+		hugPerPony = STARTING_PONE_HUG_GEN;		
+		hugConsPerChangeling = BASE_HUG_CONSUMPTION_PER_LING;
+
+		isPostStart = false;
 		foodConsPerPony = BASE_FOOD_CONSUMPTION_PER_PONE;
 	}
 	
 	void Awake() {
 		// Update our singleton to the current active instance
 		instance = this;
+		gameState = GameController.instance;
 	}
-	
+
 	// Update is called once per frame
 	void Update() {
-		GameController gameState = GameController.instance;
+
+		if (!isPostStart) {
+			reCalcHugDelta();
+			reCalcFoodDelta();
+			isPostStart = true;
+		}
+
+		UnitManager unitMgr = UnitManager.instance;
 		LogManager logger = LogManager.instance;
+		float timeDelta = Time.deltaTime;
+
 		logger.WriteToLog("Resource Statistics");
-		bool ponyDeath = false;
-		bool changelingDeath = false;
+//		bool ponyDeath = false;
+//		bool changelingDeath = false;
 
-		float foodProduction = getFoodProduction() * Time.deltaTime; 
-		float foodConsumption = getFoodConsumption() * Time.deltaTime;
-		float foodDelta = foodProduction - foodConsumption;
-
-		gameState.objResources.food += foodDelta;
+		gameState.objResources.food += foodDelta * timeDelta;
 		if (gameState.objResources.food <= 0.0f) {
 			gameState.objResources.food = 0.0f;
-			ponyDeath = true;
+//			ponyDeath = true;
 		}
 		else if (gameState.objResources.food > foodCapacity) {
 			gameState.objResources.food = foodCapacity;
 		}
 
 		if (foodDelta > 0) {
-			logger.AppendToLog("\nGenerating extra food.");
+			logger.AppendToLog("\nGenerating extra food at " + foodDelta + " food per second.");
 		}
 		else if(foodDelta < 0) {
-			logger.AppendToLog("\nNot generating enough food.");
+			logger.AppendToLog("\nNot generating enough food at " + foodDelta + " food per second.");
 		}
 		else {
 			logger.AppendToLog("\nFood is stable.");
 		}
 
+/*
 		if (ponyDeath && ponyPop > 0) {
 			ponyPop -= 1;
 			logger.AppendToLog("\nA pony died!");
 		}
+*/
 
-		float boopProduction = getBoopProduction() * Time.deltaTime;
-		float boopConsumption = getBoopConsumption() * Time.deltaTime;
-		float boopDelta = boopProduction - boopConsumption;
-
-		gameState.objResources.boop += boopDelta;
-		if (gameState.objResources.boop <= 0.0f) {
-			gameState.objResources.boop = 0.0f;
-			changelingDeath = true;
+		gameState.objResources.hug += hugDelta * timeDelta;
+		if (gameState.objResources.hug <= 0.0f) {
+			gameState.objResources.hug = 0.0f;
+//			changelingDeath = true;
 		}
-		else if (gameState.objResources.boop > boopCapacity) {
-			gameState.objResources.boop = boopCapacity;
+		else if (gameState.objResources.hug > hugCapacity) {
+			gameState.objResources.hug = hugCapacity;
 		}
 
-		if (boopDelta > 0) {
-			logger.AppendToLog("\nGenerating extra boops.");
+		if (hugDelta > 0) {
+			logger.AppendToLog("\nGenerating extra hugs at " + hugDelta + " hugs per second.");
 		}
-		else if(boopDelta < 0) {
-			logger.AppendToLog("\nNot generating enough boops.");
+		else if(hugDelta < 0) {
+			logger.AppendToLog("\nNot generating enough hugs at " + hugDelta + " hugs per second.");
 		}
 		else {
-			logger.AppendToLog("\nBoops are stable.");
+			logger.AppendToLog("\nHugs are stable.");
 		}
 
+/*
 		if (changelingDeath && changelingPop > 0) {
 			changelingPop -= 1;
 			logger.AppendToLog("\nA changeling died!");
 			JobManager.instance.starveUnits(1);
 		}
-		logger.AppendToLog("\nUnit Count: " + GameController.instance.lstUnits.Count);
+*/		
+		logger.AppendToLog("\nUnit Count: " + gameState.lstUnits.Count);
+		logger.AppendToLog("\nPopulation: \tChangelings: " + unitMgr.changelingPop + " Ponies: " + unitMgr.ponyPop);
+		logger.AppendToLog("\nJobs: \tIdle: " + JobManager.instance.getIdleCount() + " Farmers: " + JobManager.instance.getFarmerCount() + " Caretakers: " + JobManager.instance.getCaretakerCount());
 	}
 
 	/** Accessors **/
+/*
 	public float getFoodConsumption() {
 		return ponyPop * foodConsPerPony * foodConsumptionMultiplier; 
 	}
@@ -180,33 +179,60 @@ public class ResourceManager : MonoBehaviour {
 		
 		return (fUnboostedPonies * boopPerPony) + (fBoostedPonies * boopPerPony * fCaretakerBoopProdMod);
 	}	
-	
-	public float getBoopCap() {
-		return (changelingPop * boopCapFactorChangeling) + (ponyPop * boopCapFactorPony);
+*/	
+	public float getHugCap() {
+		return hugCapacity;
 	}
 	
 	public float getFoodCap() {
 		return foodCapacity;
 	}
 
-	// POPULATION
-	public float getChangelingPopulation() {
-		return changelingPop;
+	public void reCalcFoodDelta() {
+		//Check farmer count, get food produced, then get pony count and reduce by amount consumed
+		float foodConsumption = UnitManager.instance.ponyPop * foodConsPerPony;
+		float foodProduction = 0;
+
+		if (JobManager.instance.getFarmerCount() > 0) {
+			//Currently all farmers produce at the same rate, so just get the product
+			foodProduction = JobManager.instance.getFarmerCount() * JobManager.instance.getFarmerFoodGen();
+		}
+
+		foodDelta = foodProduction - foodConsumption;
 	}
 
-	public float getPonyPopulation() {
-		return ponyPop;
-	}
-	
-	public float getChangelingPopulationCap() {
-		return changelingPopCapacity;
+	public void reCalcHugDelta() {
+		//Get caretaker count, get hugs produced, then get changeling count, and reduce by amount consumed
+		float hugConsumption = UnitManager.instance.changelingPop * hugConsPerChangeling;
+		float hugProduction  = 0.0f;
+
+		//Get number of ponies tended to by harvesters
+		if (JobManager.instance.getCaretakerCount() > 0) {
+			List<Unit> lstCaretakers = gameState.lstUnits.FindAll(x => x.currentJob == (int)Unit.Job.CARETAKER);
+			int harvesterCnt = lstCaretakers.FindAll(x => x.iSubSpecies == (int)Unit.ChangelingSubSpecies.HARVESTER).Count;
+			float boostMod = JobManager.instance.getHarvesterCaretakerHugModifier();
+			float unBoostedMod = JobManager.instance.getCaretakerHugModifier();
+
+			//Get tended ponies
+			float maxTendedPonies = lstCaretakers.Count * JobManager.instance.getCaretakerPonyCap();
+			float tendedPonies = (maxTendedPonies > UnitManager.instance.ponyPop) ? UnitManager.instance.ponyPop : maxTendedPonies;
+
+			//Get amount boosted
+			float maxBoostedPonies = harvesterCnt * JobManager.instance.getCaretakerPonyCap();
+			float boostedPonies = (maxBoostedPonies > tendedPonies) ? tendedPonies : maxBoostedPonies;
+			float unBoostedPonies = 0.0f;
+
+			//Get remaining unboosted
+			if (tendedPonies > boostedPonies) {
+				unBoostedPonies = tendedPonies - boostedPonies;
+			}
+
+			hugProduction = (unBoostedPonies * hugPerPony * unBoostedMod) + (boostedPonies * hugPerPony * boostMod);
+		}
+		hugDelta = hugProduction - hugConsumption;
 	}
 
-	public float getPonyPopulationCap() {
-		return ponyPopCapacity;
-	}
-	
-	public void boopClick(){
-		GameController.instance.objResources.boop += boopPerClick;
+	public void hugClick(){
+		GameController.instance.objResources.hug += hugPerClick;
 	}
 }

@@ -22,6 +22,6 @@ public class FarmerCounter : MonoBehaviour {
 	}
 	
 	public void onModify (int val) {
-		JobManager.instance.modifyFarmerCount(val);
+		JobManager.instance.modifyJob((int)Unit.Job.FARMER, val);
 	}
 }

@@ -17,7 +17,7 @@ public class ChangelingCounter : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(changelingCountLabel != null) {
-			changelingCountLabel.text = String.Format("{0,5:N0}", ResourceManager.instance.getChangelingPopulation()) + "/" + String.Format("{0,5:N0}", ResourceManager.instance.getChangelingPopulationCap());
+			changelingCountLabel.text = String.Format("{0,5:N0}", UnitManager.instance.changelingPop) + "/" + String.Format("{0,5:N0}", UnitManager.instance.changelingPopCapacity);
 		}
 	}
 }

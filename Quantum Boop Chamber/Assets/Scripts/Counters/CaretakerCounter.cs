@@ -22,6 +22,6 @@ public class CaretakerCounter : MonoBehaviour {
 	}
 	
 	public void onModify (int val) {
-		JobManager.instance.modifyCaretakerCount(val);
+		JobManager.instance.modifyJob((int)Unit.Job.CARETAKER, val);
 	}
 }
