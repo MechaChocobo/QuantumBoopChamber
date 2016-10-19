@@ -22,6 +22,6 @@ public class ResearcherCounter : MonoBehaviour {
 	}
 	
 	public void onModify (int val) {
-		JobManager.instance.modifyResearcherCount(val);
+		JobManager.instance.modifyJob((int)Unit.Job.RESEARCHER, val);
 	}
 }

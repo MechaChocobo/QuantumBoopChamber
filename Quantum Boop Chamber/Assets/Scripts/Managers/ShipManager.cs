@@ -7,6 +7,8 @@ public class ShipManager : MonoBehaviour {
 
 	// Singleton instance
 	public static ShipManager instance {get; private set;} 
+	public RoomControl roomControl;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -51,7 +53,8 @@ public class ShipManager : MonoBehaviour {
 		//The name of the GameObject is the roomID
 		if(roomRoot) {
 			String id = roomRoot.name;
-			Debug.Log("CLICKED DA BUTTON for Room " + id);
+			roomControl.populateRoomData(id);
+			roomControl.isOpen = true;
 		}
 	}
 }

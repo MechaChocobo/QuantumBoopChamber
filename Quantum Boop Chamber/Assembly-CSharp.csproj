@@ -45,12 +45,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Rooms\Room.cs" />
      <Compile Include="Assets\Scripts\Counters\BaseCounter.cs" />
-     <Compile Include="Assets\Scripts\Counters\BoopCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\CaretakerCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\ChangelingCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\FarmerCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\FoodCounter.cs" />
+     <Compile Include="Assets\Scripts\Counters\HugCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\IdleWorkerCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\PonyCounter.cs" />
      <Compile Include="Assets\Scripts\Counters\ResearcherCounter.cs" />

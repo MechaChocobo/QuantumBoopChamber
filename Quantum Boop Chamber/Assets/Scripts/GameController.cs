@@ -23,17 +23,28 @@ public class GameController : MonoBehaviour {
 	}
 
 	void CreateStartingUnits(){ 
+		//Create Starting Units using current debug counts
 		int startingWorkers = 150;
 		int startingHarvesters = 90;
 		int startingScouts = 60;
 		int startingUni = 2, startingEarth = 2, startingPeg = 2;
 
+		int startingFarmers = 30, startingCaretakers = 1;
+
 		int itr;
 		for (itr = 0; itr < startingWorkers; itr++){
-			lstUnits.Add(new Changeling((int)Unit.ChangelingSubSpecies.WORKER));
+			Changeling newLing = new Changeling((int)Unit.ChangelingSubSpecies.WORKER);
+			if(itr < startingFarmers) {
+				newLing.currentJob = (int)Unit.Job.FARMER;
+			}
+			lstUnits.Add(newLing);
 		}
 		for (itr = 0; itr < startingHarvesters; itr++){
-			lstUnits.Add(new Changeling((int)Unit.ChangelingSubSpecies.HARVESTER));
+			Changeling newLing = new Changeling((int)Unit.ChangelingSubSpecies.HARVESTER);
+			if(itr < startingCaretakers) {
+				newLing.currentJob = (int)Unit.Job.CARETAKER;
+			}
+			lstUnits.Add(newLing);
 		}
 		for (itr = 0; itr < startingScouts; itr++){
 			lstUnits.Add(new Changeling((int)Unit.ChangelingSubSpecies.SCOUT));
@@ -51,35 +62,35 @@ public class GameController : MonoBehaviour {
 
 	public void Save() {
 		SharpSerializer serializer = new SharpSerializer(); //Currently outputting XML. Pass true to use bin mode
-
+		Dictionary<String, System.Object> saveData = new Dictionary<String, System.Object>();
+		saveData.Add("resources",objResources);
+		saveData.Add("units",lstUnits);
 		//Get all managers
-		serializer.Serialize(objResources,"resources.xml");
-		serializer.Serialize(lstUnits, "units.xml");
-//		Debug.Log(serializer.Deserialize("test.xml"));
-		//Call their save function
-		//Serialize and store
-
-
+		serializer.Serialize(saveData,"save.xml");
 	}
 
 	public void Load() {
 		SharpSerializer serializer = new SharpSerializer(); //Currently outputting XML. Pass true to use bin mode
 
-		objResources = (BaseResources)serializer.Deserialize("resources.xml");
-		lstUnits = (List<Unit>)serializer.Deserialize("units.xml");
+		Dictionary<String, System.Object> saveData = (Dictionary<String,System.Object>)serializer.Deserialize("save.xml");
+		objResources = (BaseResources)saveData["resources"];
+		lstUnits = (List<Unit>)saveData["units"];
+		JobManager.instance.updateJobCount();
+		ResourceManager.instance.reCalcHugDelta();
+		ResourceManager.instance.reCalcFoodDelta();
 	}
 }
 
 public class BaseResources {
 	// Gameplay Constants
 	private static float STARTING_FOOD = 50.0f;
-	private static float STARTING_BOOPS = 1000.0f;
+	private static float STARTING_HUGS = 10.0f;
 
-	public float boop {get; set;}
+	public float hug {get; set;}
 	public float food {get; set;}
 
 	public BaseResources(){
-		boop = STARTING_BOOPS;
+		hug = STARTING_HUGS;
 		food = STARTING_FOOD;
 	}
 }
@@ -97,10 +108,14 @@ public class Unit {
 	public enum PonySubSpecies {UNICORN, EARTH, PEGASUS};
 	public enum ChangelingSubSpecies {DRONE, WORKER, HARVESTER, SCOUT, SOLDIER, ROYAL, QUEEN};
 
+	public enum Job {IDLE, FARMER, CARETAKER, RESEARCHER};
+
 	public String name {get; set;}
 
 	public int iSpecies {get; set;}
 	public int iSubSpecies {get; set;}
+
+	public int currentJob {get; set;}
 
 	public int strength {get; set;}
 	public int dexterity {get; set;}
@@ -138,6 +153,7 @@ public class Pony : Unit {
 		System.Random rng = new System.Random();
 		iSpecies = (int)Species.PONY;
 		iSubSpecies = rng.Next(Enum.GetNames(typeof(PonySubSpecies)).Length);
+		currentJob = (int)Job.IDLE;
 		InitStats();
 		InitName();
 	}
@@ -148,6 +164,7 @@ public class Pony : Unit {
 			iSubSpecies = subSpecies;
 		else
 			Debug.Log("Invalid Pony Subspecies");
+		currentJob = (int)Job.IDLE;
 		InitStats();
 		InitName();
 	}
@@ -176,28 +193,37 @@ public class Pony : Unit {
 		wisdom = baseStats[4];
 		charisma = baseStats[5];
 	}	
-
-	//For when we randomly generate species specific names
-	public void InitName() {
-		base.InitName();
-	}
 }
 
 public class Changeling : Unit {
+	private static float HARVESTER_HUG_CAP_MOD = 12.0f;
+//	private static float HARVESTER_HUG_GEN_MOD = 20.0f;
+
+//	private static float STARTING_HUG_AMT = 8200.0f; //One day's worth
+	private static float STARTING_HUG_CAP = 24600.0f; //3 days' worth
+//	private static float STARTING_HUG_GEN = 1.0f;
+//	private static float STARTING_MAX_CUDDLES = 10.0f; //Cuddles are units of current, in hugs/sec
+
 	//{DRONE, WORKER, HARVESTER, SCOUT, SOLDIER, ROYAL, QUEEN};
 	private int[] droneStats 		= {16, 16, 16, 2, 2, 2};
 	private int[] workerStats 		= {10, 10, 12, 11, 10, 8};
-	private int[] harvesterStats 	= {10, 10, 12, 10, 10, 9};
+	private int[] harvesterStats 	= {10, 10, 12, 10, 10, 9}; //have 20x hug multiplier, 12x hug capacity
 	private int[] scoutStats 		= {10, 11, 12, 10, 10, 8};
 	private int[] soldierStats 		= {11, 10, 12, 10, 10, 8};
 	private int[] royalStats 		= {10, 10, 12, 10, 11, 8};
 	private int[] queenStats 		= {12, 11, 12, 14, 12, 12};
+
+	public float hugCapacity {get; set;}
+	public float hugGen {get; set;}
 
 	//Create Random Changeling
 	public Changeling(){
 		System.Random rng = new System.Random();
 		iSpecies = (int)Species.CHANGELING;
 		iSubSpecies = rng.Next(Enum.GetNames(typeof(ChangelingSubSpecies)).Length);	
+		currentJob = (int)Job.IDLE;
+
+		InitHugLevels();
 		InitStats();
 		InitName();
 	}
@@ -206,6 +232,9 @@ public class Changeling : Unit {
 		if (!hasQueen) {
 			System.Random rng = new System.Random();
 			iSubSpecies = rng.Next((int)ChangelingSubSpecies.WORKER, (int)ChangelingSubSpecies.SCOUT);	
+			currentJob = (int)Job.IDLE;
+
+			InitHugLevels();
 			InitStats();
 			InitName();
 		}
@@ -215,6 +244,9 @@ public class Changeling : Unit {
 		iSpecies = (int)Species.CHANGELING;
 		if (ChangelingSubSpecies.IsDefined(typeof(ChangelingSubSpecies),subSpecies)){
 			iSubSpecies = subSpecies;
+			currentJob = (int)Job.IDLE;
+
+			InitHugLevels();
 			InitStats();
 			InitName();
 		}
@@ -259,8 +291,13 @@ public class Changeling : Unit {
 		charisma = baseStats[5];
 	}
 
-	//For when we randomly generate species specific names
-	public void InitName() {
-		base.InitName();
+	public void InitHugLevels() {
+		hugCapacity = STARTING_HUG_CAP;
+//		hugGen = STARTING_HUG_GEN;
+
+		if (iSubSpecies == (int)ChangelingSubSpecies.HARVESTER) {
+			hugCapacity *= HARVESTER_HUG_CAP_MOD;
+//			hugGen *= HARVESTER_HUG_GEN_MOD;
+		}
 	}
 }
